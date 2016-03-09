@@ -44,6 +44,7 @@ dlldata.c
 project.lock.json
 artifacts/
 
+*.dll
 *_i.c
 *_p.c
 *_i.h
@@ -243,3 +244,6 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# Images
+images
