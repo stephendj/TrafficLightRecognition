@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using weka.core;
 
 namespace LearningModule
 {
@@ -65,6 +66,8 @@ namespace LearningModule
                     lowerRightYList.Add(Int32.Parse(values[5]));
                     label.Add(values[1]);
                 }
+
+                
 
                 // Iterate through all list
                 for (int j = 0; j < nameList.Count; ++j)
