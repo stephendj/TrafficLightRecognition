@@ -247,3 +247,6 @@ paket-files/
 
 # Images
 images
+
+# Training data
+data
