@@ -27,7 +27,7 @@ namespace LearningModule
         );
 
         /* Number of folders of images to be trained */
-        private static int numDayFolders = 5;
+        private static int numDayFolders = 1;
         private static int numNightFolders = 5;
         //private static int numDayFolders = Directory.GetDirectories("../../images/dayTrain/").Length;
         //private static int numNightFolders = Directory.GetDirectories("../../images/nightTrain/").Length;
@@ -84,8 +84,11 @@ namespace LearningModule
         /*                                                                                           *
          *  Iterate through all list, crop image, extract features, and store data as training data  *
          *                                                                                           */
-        public static void train(Instances HOGInstances)
+        public static Instances extractFeatures()
         {
+            List<string> class_values = new List<string>() { "circle", "left_arrow", "right_arrow" };
+            Instances HOGInstances = createHOGInstances(Convert.ToInt32(hog.DescriptorSize), class_values, 60000);
+
             int numData = 1;
             for (int i = 0; i < nameList.Count; ++i)
             {
@@ -137,6 +140,8 @@ namespace LearningModule
 
                 CvInvoke.cvResetImageROI(image);
             }
+
+            return HOGInstances;
         }
 
         /*                                                               *
@@ -205,21 +210,19 @@ namespace LearningModule
 
         static void Main(string[] args)
         {
-            List<string> class_values = new List<string>() { "circle", "left_arrow", "right_arrow" };
-            Instances HOGInstances = createHOGInstances(Convert.ToInt32(hog.DescriptorSize), class_values, 60000);
-
             /* Read the annotated CSV and store the informations in the lists */
-            //for (int i = 1; i <= numDayFolders; ++i)
-            //{
-            //    readLabeledCSV("../../images/dayTrain/dayClip" + i + "/frameAnnotationsBULB.csv");
-            //}
+            for (int i = 1; i <= numDayFolders; ++i)
+            {
+                readLabeledCSV("../../images/dayTrain/dayClip" + i + "/frameAnnotationsBULB.csv");
+            }
             //for (int i = 1; i <= numNightFolders; ++i)
             //{
             //    readLabeledCSV("../../images/nightTrain/nightClip" + i + "/frameAnnotationsBULB.csv");
             //}
 
             /* Train the data and write to ARFF file */
-            //train(HOGInstances);
+            Instances HOGInstances = extractFeatures();
+            Console.WriteLine(HOGInstances);
             //writeToARFF(HOGInstances, "../../data/test.arff");
         }
     }
