@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using weka.classifiers.functions;
 using weka.core;
 using weka.core.converters;
 
@@ -14,37 +15,78 @@ namespace LearningModule
     class HOGLearner
     {
         /* HOG Descriptor for learning */
-        private static HOGDescriptor hog = new HOGDescriptor(
-            new Size(40, 40),   // win_size
-            new Size(8, 8),     // block_size
-            new Size(4, 4),     // block_stride
-            new Size(4, 4),     // cell_size
-                9,              // nbins
-                1,              // deriv_aperture
-                -1,             // win_sigma
-                0.2,            // L2HysThreshold
-                true            // gamma correction
-        );
+        private HOGDescriptor hog;
 
         /* Number of folders of images to be trained */
-        private static int numDayFolders = 1;
-        private static int numNightFolders = 5;
-        //private static int numDayFolders = Directory.GetDirectories("../../images/dayTrain/").Length;
-        //private static int numNightFolders = Directory.GetDirectories("../../images/nightTrain/").Length;
+        private int numDayFolders;
+        private int numNightFolders;
 
         /* List of data to be trained (folder name, image name, upper left x, upper left y, lower right x, lower right y, label) */
-        private static List<string> folderList = new List<string>();
-        private static List<string> nameList = new List<string>();
-        private static List<int> upperLeftXList = new List<int>();
-        private static List<int> upperLeftYList = new List<int>();
-        private static List<int> lowerRightXList = new List<int>();
-        private static List<int> lowerRightYList = new List<int>();
-        private static List<string> label = new List<string>();
+        private List<string> folderList;
+        private List<string> nameList;
+        private List<int> upperLeftXList;
+        private List<int> upperLeftYList;
+        private List<int> lowerRightXList;
+        private List<int> lowerRightYList;
+        private List<string> label;
+
+        /*              *
+         *  Constructor *
+         *              */
+        public HOGLearner()
+        {
+            try
+            {
+                hog = new HOGDescriptor(
+                    new Size(40, 40),   // win_size
+                    new Size(8, 8),     // block_size
+                    new Size(4, 4),     // block_stride
+                    new Size(4, 4),     // cell_size
+                        9,              // nbins
+                        1,              // deriv_aperture
+                        -1,             // win_sigma
+                        0.2,            // L2HysThreshold
+                        true            // gamma correction
+                );
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.InnerException);
+            }
+
+            numDayFolders = 1;
+            numNightFolders = 5;
+            //numDayFolders = Directory.GetDirectories("../../images/dayTrain/").Length;
+            //numNightFolders = Directory.GetDirectories("../../images/nightTrain/").Length;
+
+            folderList = new List<string>();
+            nameList = new List<string>();
+            upperLeftXList = new List<int>();
+            upperLeftYList = new List<int>();
+            lowerRightXList = new List<int>();
+            lowerRightYList = new List<int>();
+            label = new List<string>();
+        }
+
+        public HOGDescriptor getHOGDescriptor()
+        {
+            return hog;
+        }
+
+        public int getNumDayFolders()
+        {
+            return numDayFolders;
+        }
+
+        public int getNightDayFolders()
+        {
+            return numNightFolders;
+        }
 
         /*                                                                  *
          *  Read annotated CSV files and store the information in the lists *
          *                                                                  */
-        public static void readLabeledCSV(string fileName)
+        public void readLabeledCSV(string fileName)
         {
             var reader = new StreamReader(File.OpenRead(fileName));
             var header = reader.ReadLine();
@@ -61,7 +103,6 @@ namespace LearningModule
                 else
                 {
                     folderList.Add("nightClip" + fileName[fileName.IndexOf("nightClip") + 9]);
-                    Console.WriteLine("nightClip" + fileName[fileName.IndexOf("nightClip") + 9]);
                 }
                 
                 nameList.Add(values[0]);
@@ -84,7 +125,7 @@ namespace LearningModule
         /*                                                                                           *
          *  Iterate through all list, crop image, extract features, and store data as training data  *
          *                                                                                           */
-        public static Instances extractFeatures()
+        public Instances extractFeatures()
         {
             List<string> class_values = new List<string>() { "circle", "left_arrow", "right_arrow" };
             Instances HOGInstances = createHOGInstances(Convert.ToInt32(hog.DescriptorSize), class_values, 60000);
@@ -110,7 +151,7 @@ namespace LearningModule
                 image.ROI = r;
                 float[] HOGDescriptor = GetVector(image);
 
-                Instance instance = new Instance(HOGInstances.numAttributes());
+                Instance instance = new DenseInstance(HOGInstances.numAttributes());
                 instance.setDataset(HOGInstances);
                 for (int j = 0; j < instance.numAttributes() - 1; ++j)
                 {
@@ -124,9 +165,9 @@ namespace LearningModule
                 // If the image is a left arrow, flip it and store it in training data as right arrow
                 if (label[i] == "left_arrow")
                 {
-                    Image<Bgr, Byte> flippedImage = image.Flip(FLIP.HORIZONTAL);
+                    Image<Bgr, Byte> flippedImage = image.Flip(FlipType.Horizontal);
                     HOGDescriptor = GetVector(flippedImage);
-                    instance = new Instance(HOGInstances.numAttributes());
+                    instance = new DenseInstance(HOGInstances.numAttributes());
                     instance.setDataset(HOGInstances);
                     for (int j = 0; j < instance.numAttributes() - 1; ++j)
                     {
@@ -147,21 +188,21 @@ namespace LearningModule
         /*                                                               *
          *  Create new HOG Instances to store all of the training data   *
          *                                                               */
-        private static Instances createHOGInstances(int descriptorSize, List<string> class_values, int maxInstances)
+        private Instances createHOGInstances(int descriptorSize, List<string> class_values, int maxInstances)
         {
-            FastVector attributes = new FastVector(descriptorSize + 1);
+            ArrayList attributes = new ArrayList(descriptorSize + 1);
             for (int i = 1; i <= Convert.ToInt32(hog.DescriptorSize); ++i)
             {
                 weka.core.Attribute att = new weka.core.Attribute("v" + i);
-                attributes.addElement(att);
+                attributes.add(att);
             }
-
-            FastVector values = new FastVector(class_values.Count);
+            
+            ArrayList values = new ArrayList(class_values.Count);
             foreach (string class_value in class_values)
             {
-                values.addElement(class_value);
+                values.add(class_value);
             }
-            attributes.addElement(new weka.core.Attribute("label", values));
+            attributes.add(new weka.core.Attribute("label", values));
 
             Instances dataTrain = new Instances("HOG Vector", attributes, maxInstances);
             dataTrain.setClassIndex(dataTrain.numAttributes() - 1);
@@ -180,18 +221,29 @@ namespace LearningModule
             saver.writeBatch();
         }
 
+        /*                                          *
+         *  Write the instances data to csv file    *
+         *                                          */
+        public static void writeToCSV(Instances instances, string fileName)
+        {
+            CSVSaver saver = new CSVSaver();
+            saver.setInstances(instances);
+            saver.setFile(new java.io.File(fileName));
+            saver.writeBatch();
+        }
+
         /*                                  *
          *  Resize the image to 40x40 size  *
          *                                  */
-        public static Image<Bgr, Byte> Resize(Image<Bgr, Byte> im)
+        private Image<Bgr, Byte> Resize(Image<Bgr, Byte> im)
         {
-            return im.Resize(40, 40, INTER.CV_INTER_LINEAR);
+            return im.Resize(40, 40, Inter.Linear);
         }
 
         /*                              *
          *  Get HOG descriptor vectors  *
          *                              */
-        public static float[] GetVector(Image<Bgr, Byte> im)
+        private float[] GetVector(Image<Bgr, Byte> im)
         {
             Image<Bgr, Byte> imageOfInterest = Resize(im);
             Point[] p = new Point[imageOfInterest.Width * imageOfInterest.Height];
@@ -210,20 +262,40 @@ namespace LearningModule
 
         static void Main(string[] args)
         {
+            /*                      *
+             *  Feature Extraction  *
+             *                      */
+            //HOGLearner learner = new HOGLearner();
+
             /* Read the annotated CSV and store the informations in the lists */
-            for (int i = 1; i <= numDayFolders; ++i)
-            {
-                readLabeledCSV("../../images/dayTrain/dayClip" + i + "/frameAnnotationsBULB.csv");
-            }
-            //for (int i = 1; i <= numNightFolders; ++i)
+            //for (int i = 1; i <= learner.getNumDayFolders(); ++i)
             //{
-            //    readLabeledCSV("../../images/nightTrain/nightClip" + i + "/frameAnnotationsBULB.csv");
+            //    learner.readLabeledCSV("../../images/dayTrain/dayClip" + i + "/frameAnnotationsBULB.csv");
+            //}
+            //for (int i = 1; i <= learner.getNightDayFolders(); ++i)
+            //{
+            //    learner.readLabeledCSV("../../images/nightTrain/nightClip" + i + "/frameAnnotationsBULB.csv");
             //}
 
             /* Train the data and write to ARFF file */
-            Instances HOGInstances = extractFeatures();
-            Console.WriteLine(HOGInstances);
-            //writeToARFF(HOGInstances, "../../data/test.arff");
+            //Instances HOGInstances = learner.extractFeatures();
+            //Console.WriteLine(HOGInstances);
+            //writeToARFF(HOGInstances, "../../data/data.arff");
+
+            /*                      *
+             *  Learning Process    *
+             *                      */
+
+            /* Load the Data Arff file */
+            Console.WriteLine("Loading dataset...");
+            Instances HOGInstances = (new ConverterUtils.DataSource("../../data/data.arff")).getDataSet();
+            HOGInstances.setClassIndex(HOGInstances.numAttributes() - 1);
+            writeToCSV(HOGInstances, "../../data/data.csv");
+
+            /* Write model to file */
+            //SerializationHelper.write("../../data/data.model", svm);
+
+            var a = Console.ReadLine();
         }
     }
 }

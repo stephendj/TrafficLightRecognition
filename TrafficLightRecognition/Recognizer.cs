@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Emgu.CV;
+using Emgu.CV.Structure;
+using Emgu.CV.UI;
+using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace TrafficLightRecognition
 {
-    static class Program
+    class Recognizer
     {
         /// <summary>
         /// The main entry point for the application.
