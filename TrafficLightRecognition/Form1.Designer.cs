@@ -29,11 +29,10 @@
         private void InitializeComponent()
         {
             this.Video_Image_1 = new System.Windows.Forms.PictureBox();
-            this.Video_Image_2 = new System.Windows.Forms.PictureBox();
-            this.Time_Label = new System.Windows.Forms.Label();
-            this.Frame_lbl = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.Video_Image_1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Video_Image_2)).BeginInit();
             this.SuspendLayout();
             // 
             // Video_Image_1
@@ -48,60 +47,59 @@
             this.Video_Image_1.TabIndex = 1;
             this.Video_Image_1.TabStop = false;
             // 
-            // Video_Image_2
+            // button1
             // 
-            this.Video_Image_2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.Video_Image_2.Location = new System.Drawing.Point(610, 25);
-            this.Video_Image_2.Name = "Video_Image_2";
-            this.Video_Image_2.Size = new System.Drawing.Size(570, 420);
-            this.Video_Image_2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.Video_Image_2.TabIndex = 1;
-            this.Video_Image_2.TabStop = false;
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button1.Location = new System.Drawing.Point(15, 458);
+            this.button1.Name = "brose_image";
+            this.button1.Size = new System.Drawing.Size(90, 23);
+            this.button1.TabIndex = 6;
+            this.button1.Text = "Browse Image";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.browse_image_Click);
             // 
-            // Time_Label
+            // button2
             // 
-            this.Time_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Time_Label.AutoSize = true;
-            this.Time_Label.Location = new System.Drawing.Point(12, 463);
-            this.Time_Label.Name = "Time_Label";
-            this.Time_Label.Size = new System.Drawing.Size(33, 13);
-            this.Time_Label.TabIndex = 4;
-            this.Time_Label.Text = "Time:";
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom)));
+            this.button2.Location = new System.Drawing.Point(264, 458);
+            this.button2.Name = "browse_video";
+            this.button2.Size = new System.Drawing.Size(90, 23);
+            this.button2.TabIndex = 7;
+            this.button2.Text = "Browse Video";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.browse_video_Click);
             // 
-            // Frame_lbl
+            // button3
             // 
-            this.Frame_lbl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Frame_lbl.AutoSize = true;
-            this.Frame_lbl.Location = new System.Drawing.Point(12, 489);
-            this.Frame_lbl.Name = "Frame_lbl";
-            this.Frame_lbl.Size = new System.Drawing.Size(39, 13);
-            this.Frame_lbl.TabIndex = 5;
-            this.Frame_lbl.Text = "Frame:";
+            this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button3.Location = new System.Drawing.Point(495, 458);
+            this.button3.Name = "camera";
+            this.button3.Size = new System.Drawing.Size(90, 23);
+            this.button3.TabIndex = 8;
+            this.button3.Text = "Camera";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.camera_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1200, 520);
-            this.Controls.Add(this.Frame_lbl);
-            this.Controls.Add(this.Time_Label);
+            this.ClientSize = new System.Drawing.Size(600, 500);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.Video_Image_1);
-            this.Controls.Add(this.Video_Image_2);
             this.Name = "Form1";
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.Video_Image_1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Video_Image_2)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
         private System.Windows.Forms.PictureBox Video_Image_1;
-        private System.Windows.Forms.PictureBox Video_Image_2;
-        private System.Windows.Forms.Label Time_Label;
-        private System.Windows.Forms.Label Frame_lbl;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button3;
     }
 }
