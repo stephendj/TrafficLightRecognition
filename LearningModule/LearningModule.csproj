@@ -159,6 +159,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfusionMatrix.cs" />
     <Compile Include="HOGLearner.cs" />
     <Compile Include="ImageCropper.cs" />
     <Compile Include="MainProgram.cs" />

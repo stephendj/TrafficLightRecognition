@@ -47,7 +47,7 @@ namespace TrafficLightRecognition
 
             // Load the model
             svm = new SVM();
-            FileStorage fsr = new FileStorage("../../../data/emgu.xml", FileStorage.Mode.Read);
+            FileStorage fsr = new FileStorage("../../../data/model.xml", FileStorage.Mode.Read);
             svm.Read(fsr.GetFirstTopLevelNode());
             
             // Initialize Instances
@@ -227,7 +227,7 @@ namespace TrafficLightRecognition
                     imgShow.Draw(KeyValuePair.Key, new Bgr(0, 0, 255), 3);
                     imgShow.Draw(
                         KeyValuePair.Value,
-                        new Point(KeyValuePair.Key.Left, KeyValuePair.Key.Bottom),
+                        new Point(KeyValuePair.Key.Left - 30, KeyValuePair.Key.Bottom + 20),
                         FontFace.HersheyPlain,
                         2,
                         new Bgr(255, 255, 255),

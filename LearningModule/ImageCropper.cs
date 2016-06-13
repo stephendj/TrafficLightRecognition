@@ -8,7 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 
-namespace LearningModule2
+namespace LearningModule
 {
     class ImageCropper
     {
@@ -34,8 +34,8 @@ namespace LearningModule2
          *              */
         public ImageCropper()
         {
-            numDayFolders = Directory.GetDirectories("../../../images/dayTrain/").Length;
-            numNightFolders = Directory.GetDirectories("../../../images/nightTrain/").Length;
+            numDayFolders = Directory.GetDirectories("../../images/dayTrain/").Length;
+            numNightFolders = Directory.GetDirectories("../../images/nightTrain/").Length;
 
             folderList = new List<string>();
             nameList = new List<string>();
@@ -140,26 +140,32 @@ namespace LearningModule2
             }
         }
 
-        public void cropTrafficLightVideos(int Time_millisecounds)
+        public void cropTrafficLightVideos()
         {
             var ext = new List<string> { ".mp4", ".avi", ".wmv" };
-            var fileArray = Directory.GetFiles("../../images/", "*.*").Where(s => ext.Any(e => s.EndsWith(e)));
+            var fileArray = Directory.GetFiles("../../images/video", "*.*").Where(s => ext.Any(e => s.EndsWith(e)));
             foreach (string file in fileArray)
             {
-                List<Image<Bgr, Byte>> image_array = new List<Image<Bgr, Byte>>();
-                System.Diagnostics.Stopwatch SW = new System.Diagnostics.Stopwatch();
-
                 bool Reading = true;
                 Capture cap = new Capture(file);
-                SW.Start();
-
                 while (Reading)
                 {
-                    Image<Bgr, Byte> frame = cap.QueryFrame().ToImage<Bgr, Byte>();
-                    if (frame != null)
+                    Mat frameMat = null;
+                    for (int i = 0; i < 15; i++)
                     {
+                        try {
+                            frameMat = cap.QueryFrame();
+                        } catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                        if (frameMat == null) break;
+                    }
+                    
+                    if (frameMat != null)
+                    {
+                        Image<Bgr, Byte> frame = frameMat.ToImage<Bgr, Byte>();
                         cropImageFromRaw(frame.Copy());
-                        if (SW.ElapsedMilliseconds >= Time_millisecounds) Reading = false;
                     }
                     else
                     {
@@ -171,52 +177,52 @@ namespace LearningModule2
 
         private void cropImageFromRaw(Image<Bgr, byte> image)
         {
-            if (image.Width >= 15 && image.Height >= 15)
+            Image<Gray, Byte> imgR, imgY, imgG, imgEdit;
+            List<Rectangle> boundingBoxes;
+
+            imgR = image.InRange(new Bgr(0, 0, 200), new Bgr(100, 100, 255));
+            imgY = image.InRange(new Bgr(0, 100, 200), new Bgr(80, 255, 255));
+            imgG = image.InRange(new Bgr(150, 150, 0), new Bgr(255, 255, 80));
+            imgEdit = imgR + imgY + imgG;
+            imgEdit = imgEdit.SmoothGaussian(7);
+
+            // Find bounding boxes for each object captured
+            boundingBoxes = FindBoundingBoxes(imgEdit);
+            int init_size;
+            do
             {
-                Image<Gray, Byte> imgR, imgY, imgG, imgEdit;
-                List<Rectangle> boundingBoxes;
-
-                imgR = image.InRange(new Bgr(0, 0, 200), new Bgr(100, 100, 255));
-                imgY = image.InRange(new Bgr(0, 100, 200), new Bgr(80, 255, 255));
-                imgG = image.InRange(new Bgr(150, 150, 0), new Bgr(255, 255, 80));
-                imgEdit = imgR + imgY + imgG;
-                imgEdit = imgEdit.SmoothGaussian(7);
-
-                // Find bounding boxes for each object captured
-                boundingBoxes = FindBoundingBoxes(imgEdit);
-                int init_size;
-                do
+                init_size = boundingBoxes.Count;
+                bool intersect = false;
+                for (int j = 0; j < boundingBoxes.Count - 1; ++j)
                 {
-                    init_size = boundingBoxes.Count;
-                    bool intersect = false;
-                    for (int j = 0; j < boundingBoxes.Count - 1; ++j)
+                    for (int k = j + 1; k < boundingBoxes.Count; ++k)
                     {
-                        for (int k = j + 1; k < boundingBoxes.Count; ++k)
+                        if (boundingBoxes[j].IntersectsWith(boundingBoxes[k]))
                         {
-                            if (boundingBoxes[j].IntersectsWith(boundingBoxes[k]))
-                            {
-                                Rectangle r1 = boundingBoxes[k];
-                                Rectangle r2 = boundingBoxes[j];
-                                boundingBoxes.Remove(r1);
-                                boundingBoxes.Remove(r2);
-                                boundingBoxes.Add(Rectangle.Union(r1, r2));
-                                intersect = true;
-                                break;
-                            }
-                        }
-                        if (intersect)
-                        {
+                            Rectangle r1 = boundingBoxes[k];
+                            Rectangle r2 = boundingBoxes[j];
+                            boundingBoxes.Remove(r1);
+                            boundingBoxes.Remove(r2);
+                            boundingBoxes.Add(Rectangle.Union(r1, r2));
+                            intersect = true;
                             break;
                         }
                     }
-                } while (boundingBoxes.Count != init_size);
-
-                foreach (Rectangle rect in boundingBoxes)
-                {
-                    image.ROI = rect;
-                    image.Save("../../images/" + Guid.NewGuid().ToString().Replace("-", string.Empty).Substring(0, 8) + ".jpg");
-                    image.ROI = Rectangle.Empty;
+                    if (intersect)
+                    {
+                        break;
+                    }
                 }
+            } while (boundingBoxes.Count != init_size);
+
+            foreach (Rectangle rect in boundingBoxes)
+            {
+                image.ROI = rect;
+                if(image.Width >= 16 && image.Height >= 16)
+                {
+                    image.Save("../../images/" + Guid.NewGuid().ToString().Replace("-", string.Empty).Substring(0, 8) + ".jpg");
+                }
+                image.ROI = Rectangle.Empty;
             }
         }
 
